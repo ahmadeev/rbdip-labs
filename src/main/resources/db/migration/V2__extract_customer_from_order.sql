@@ -26,7 +26,7 @@ ALTER TABLE customers
     DROP COLUMN source_order_id;
 
 ALTER TABLE orders
-    ADD CONSTRAINT fk_orders_customer
+    ADD CONSTRAINT fk_orders_customers
     FOREIGN KEY (customer_id)
     REFERENCES customers(id);
 

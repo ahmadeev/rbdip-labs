@@ -4,11 +4,12 @@ import com.rbdip.bookstore.customer.Customer;
 import com.rbdip.bookstore.customer.CustomerRepository;
 import com.rbdip.bookstore.product.Product;
 import com.rbdip.bookstore.product.ProductRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * God-класс: валидация, расчёт цены, персистентность и "уведомление
@@ -73,7 +74,7 @@ public class OrderService {
         for (int i = 0; i < products.size(); i++) {
             Product product = products.get(i);
             int quantity = lineItems.get(i).quantity();
-            orderItemRepository.save(new OrderItem(order.getId(), product.getName(), product.getPrice(), quantity));
+            orderItemRepository.save(new OrderItem(order.getId(), product, quantity));
         }
 
         orderEmailNotifier.sendConfirmationEmail(request.customerFullName(), order.getId(), total);

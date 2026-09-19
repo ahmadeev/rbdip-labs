@@ -1,13 +1,10 @@
 package com.rbdip.bookstore.order;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.Map;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class OrderController {
@@ -45,7 +42,7 @@ public class OrderController {
                             "customerFullName", order.getCustomer().getFullName(),
                             "status", order.getStatus(),
                             "items", items.stream()
-                                    .map(i -> Map.of("productName", i.getProductName(), "quantity", i.getQuantity()))
+                                    .map(i -> Map.of("productName", i.getProduct().getName(), "quantity", i.getQuantity()))
                                     .toList());
                 })
                 .toList();
