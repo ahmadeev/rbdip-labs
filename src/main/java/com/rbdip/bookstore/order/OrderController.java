@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 public class OrderController {
@@ -32,19 +33,27 @@ public class OrderController {
     @GetMapping("/orders")
     public List<Map<String, Object>> listOrders() {
         List<Order> orders = orderRepository.findAll();
+
+        // N+1: отдельный запрос на позиции для каждого заказа вместо
+        // одного JOIN FETCH / batch-запроса. Цель для ЛР4.
+        Map<Long, List<OrderItem>> itemsByOrderId = orders.isEmpty()
+                ? Map.of()
+                : orderItemRepository.findByOrderIdIn(
+                    orders.stream().map(Order::getId).toList()
+                ).stream().collect(Collectors.groupingBy(OrderItem::getOrderId));
+
         return orders.stream()
-                .map(order -> {
-                    // N+1: отдельный запрос на позиции для каждого заказа вместо
-                    // одного JOIN FETCH / batch-запроса. Цель для ЛР4.
-                    List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
-                    return Map.<String, Object>of(
-                            "id", order.getId(),
-                            "customerFullName", order.getCustomer().getFullName(),
-                            "status", order.getStatus(),
-                            "items", items.stream()
-                                    .map(i -> Map.of("productName", i.getProduct().getName(), "quantity", i.getQuantity()))
-                                    .toList());
-                })
+                .map(order -> Map.<String, Object>of(
+                        "id", order.getId(),
+                        "customerFullName", order.getCustomer().getFullName(),
+                        "status", order.getStatus(),
+                        "items", itemsByOrderId.getOrDefault(order.getId(), List.of())
+                                .stream()
+                                .map(item -> Map.of(
+                                        "productName", item.getProduct().getName(),
+                                        "quantity", item.getQuantity()))
+                                .toList()
+                ))
                 .toList();
     }
 }

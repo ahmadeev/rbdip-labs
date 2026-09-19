@@ -11,4 +11,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     // контроллером, что и создаёт N+1 (см. OrderController#listOrders).
     @EntityGraph(attributePaths = "product")
     List<OrderItem> findByOrderId(Long orderId);
+
+    @EntityGraph(attributePaths = "product")
+    List<OrderItem> findByOrderIdIn(List<Long> orderIds);
 }
