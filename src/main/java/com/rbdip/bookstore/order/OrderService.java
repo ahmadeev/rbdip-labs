@@ -1,5 +1,7 @@
 package com.rbdip.bookstore.order;
 
+import com.rbdip.bookstore.customer.Customer;
+import com.rbdip.bookstore.customer.CustomerRepository;
 import com.rbdip.bookstore.product.Product;
 import com.rbdip.bookstore.product.ProductRepository;
 import java.math.BigDecimal;
@@ -21,6 +23,7 @@ public class OrderService {
     private final PricingCalculator pricingCalculator;
     private final OrderEmailNotifier orderEmailNotifier;
     private final OrderRequestValidator orderRequestValidator;
+    private final CustomerRepository customerRepository;
 
     public OrderService(
             ProductRepository productRepository,
@@ -28,13 +31,15 @@ public class OrderService {
             OrderItemRepository orderItemRepository,
             PricingCalculator pricingCalculator,
             OrderEmailNotifier orderEmailNotifier,
-            OrderRequestValidator orderRequestValidator) {
+            OrderRequestValidator orderRequestValidator,
+            CustomerRepository customerRepository) {
         this.productRepository = productRepository;
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.pricingCalculator = pricingCalculator;
         this.orderEmailNotifier = orderEmailNotifier;
         this.orderRequestValidator = orderRequestValidator;
+        this.customerRepository = customerRepository;
     }
 
     @Transactional
@@ -57,8 +62,12 @@ public class OrderService {
         BigDecimal total = pricingCalculator.calculateOrderTotal(
                 lineItems, request.customerType() == null ? "regular" : request.customerType(), request.couponCode());
 
-        Order order = new Order(
-                request.customerFullName(), request.customerAddress(), request.customerPhone(), "new");
+        Customer customer = customerRepository.save(new Customer(
+                request.customerFullName(),
+                request.customerAddress(),
+                request.customerPhone()));
+
+        Order order = new Order(customer, "new");
         order = orderRepository.save(order);
 
         for (int i = 0; i < products.size(); i++) {
