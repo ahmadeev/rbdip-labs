@@ -17,7 +17,9 @@ public class OrderController {
     private final OrderItemRepository orderItemRepository;
 
     public OrderController(
-            OrderService orderService, OrderRepository orderRepository, OrderItemRepository orderItemRepository) {
+            OrderService orderService,
+            OrderRepository orderRepository,
+            OrderItemRepository orderItemRepository) {
         this.orderService = orderService;
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
